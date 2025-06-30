@@ -2,9 +2,10 @@ package main
 
 import (
 	"fmt"
+	"html/template"
+	"log"
 	"net/http"
 	"strconv"
-	"strings"
 )
 
 func home(w http.ResponseWriter, r *http.Request) {
@@ -12,12 +13,18 @@ func home(w http.ResponseWriter, r *http.Request) {
 		http.NotFound(w, r)
 		return
 	}
-	name := r.URL.Query().Get("name")
-	if name != "" {
-		w.Write([]byte("Hello " + strings.ToUpper(name) + "\nWelcome to my snippetBox Experiment"))
-	} else {
-		w.Write([]byte("Hello from SnippetBox Home"))
+	template_set, err := template.ParseFiles("./ui/html/pages/home.tmpl")
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
 	}
+	err = template_set.Execute(w, nil)
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+	}
+
 }
 
 func snippetView(w http.ResponseWriter, r *http.Request) {
