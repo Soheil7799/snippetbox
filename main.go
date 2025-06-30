@@ -7,6 +7,10 @@ import (
 )
 
 func home(w http.ResponseWriter, r *http.Request) {
+	if r.URL.Path != "/" {
+		http.NotFound(w, r)
+		return
+	}
 	name := r.URL.Query().Get("name")
 	if name != "" {
 		w.Write([]byte("Hello " + strings.ToUpper(name) + "\nWelcome to my snippetBox Experiment"))
