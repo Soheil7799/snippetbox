@@ -21,21 +21,12 @@ func main() {
 		logInfo: logInfo,
 	}
 
-	mux := http.NewServeMux()
-
-	fileserver := http.FileServer((http.Dir("./ui/static")))
-	mux.Handle("/static/", http.StripPrefix("/static", fileserver))
-
-	mux.HandleFunc("/", app.home)
-	mux.HandleFunc("/snippet/view", app.snippetView)
-	mux.HandleFunc("/snippet/create", app.snippetCreate)
-
 	addr := flag.String("addr", ":4000", "HTTP network listening address")
 
 	srv := &http.Server{
 		Addr:     *addr,
 		ErrorLog: logErr,
-		Handler:  mux,
+		Handler:  app.routes(),
 	}
 
 	flag.Parse()
