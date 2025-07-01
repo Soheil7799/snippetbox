@@ -7,17 +7,28 @@ import (
 	"os"
 )
 
+type application struct {
+	logErr  *log.Logger
+	logInfo *log.Logger
+}
+
 func main() {
 	logInfo := log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
 	logErr := log.New(os.Stderr, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
+
+	app := &application{
+		logErr:  logErr,
+		logInfo: logInfo,
+	}
+
 	mux := http.NewServeMux()
 
 	fileserver := http.FileServer((http.Dir("./ui/static")))
 	mux.Handle("/static/", http.StripPrefix("/static", fileserver))
 
-	mux.HandleFunc("/", home)
-	mux.HandleFunc("/snippet/view", snippetView)
-	mux.HandleFunc("/snippet/create", snippetCreate)
+	mux.HandleFunc("/", app.home)
+	mux.HandleFunc("/snippet/view", app.snippetView)
+	mux.HandleFunc("/snippet/create", app.snippetCreate)
 
 	addr := flag.String("addr", ":4000", "HTTP network listening address")
 
