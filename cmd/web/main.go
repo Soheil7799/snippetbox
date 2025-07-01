@@ -21,11 +21,16 @@ func main() {
 
 	addr := flag.String("addr", ":4000", "HTTP network listening address")
 
+	srv := &http.Server{
+		Addr:     *addr,
+		ErrorLog: logErr,
+		Handler:  mux,
+	}
+
 	flag.Parse()
 	logInfo.Printf("Starting server on %s", *addr)
-	err := http.ListenAndServe(*addr, mux)
-	if err != nil {
-		logErr.Fatal(err)
-	}
+	// err := http.ListenAndServe(*addr, mux)
+	err := srv.ListenAndServe()
+	logErr.Fatal(err)
 
 }
