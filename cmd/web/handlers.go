@@ -1,10 +1,13 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"html/template"
 	"net/http"
 	"strconv"
+
+	"github.com/Soheil7799/snippetbox/internal/models"
 )
 
 func (app *application) home(w http.ResponseWriter, r *http.Request) {
@@ -38,22 +41,38 @@ func (app *application) snippetView(w http.ResponseWriter, r *http.Request) {
 		app.notFound(w)
 		w.Write([]byte("No id was found\nDefault snippet view"))
 		return
-	} else {
-		// w.Write([]byte(fmt.Sprintf("Here is the snippet with the id: %d", id)))
-		fmt.Fprintf(w, "Here is the snippet with the id: %d", id)
 	}
 
+	snippet, err := app.snippets.Get(id)
+	if err != nil {
+		if errors.Is(err, models.ErrNoRecord) {
+			app.notFound(w)
+		} else {
+			app.serverError(w, err)
+		}
+		return
+	}
+	fmt.Fprintf(w, "%+v", snippet)
 }
 
 func (app *application) snippetCreate(w http.ResponseWriter, r *http.Request) {
+	//fmt.Println("before method check")
 	if r.Method != http.MethodPost {
 		w.Header().Set("Allow", http.MethodPost)
-		// w.WriteHeader(405)
-		// w.Write([]byte("Need POST method to work !"))
 		app.clientError(w, http.StatusMethodNotAllowed)
 		return
 	}
-	// w.Header().Set("Content-Type", "application/json")
-	// w.Write([]byte(`{"name":"soheil"}`))
-	w.Write([]byte("Here I think user could create some snippets ?!..."))
+	//fmt.Println("handler called with post (after method check)")
+	title := "0 snail"
+	content := "0 snail\nClimb mount fuji,\nBut slowly slowly!\n\n- Kobayashi Issa"
+	expires := 7
+	//fmt.Println("before calling insert")
+	id, err := app.snippets.Insert(title, content, expires)
+	//fmt.Println("after calling insert")
+	if err != nil {
+		app.serverError(w, err)
+		return
+	}
+	//fmt.Sprintf("after error checking insert with id: %d", id)
+	http.Redirect(w, r, fmt.Sprintf("/snippet/view?id=%d", id), http.StatusSeeOther)
 }
