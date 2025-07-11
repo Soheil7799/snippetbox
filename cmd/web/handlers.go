@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 
-	"html/template"
 	"net/http"
 	"strconv"
 
@@ -26,21 +25,7 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 		Snippets: snippets,
 	}
 
-	files := []string{
-		"./ui/html/pages/home.tmpl",
-		"./ui/html/base.tmpl",
-		"./ui/html/partials/nav.tmpl",
-	}
-	template_set, err := template.ParseFiles(files...)
-	if err != nil {
-		app.serverError(w, err)
-		return
-	}
-	err = template_set.ExecuteTemplate(w, "base", data)
-	if err != nil {
-		app.serverError(w, err)
-	}
-
+	app.render(w, http.StatusOK, "home.tmpl", data)
 }
 
 func (app *application) snippetView(w http.ResponseWriter, r *http.Request) {
@@ -60,46 +45,26 @@ func (app *application) snippetView(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
-	// fmt.Fprintf(w, "%+v", snippet)
-	files := []string{
-		"./ui/html/base.tmpl",
-		"./ui/html/partials/nav.tmpl",
-		"./ui/html/pages/view.tmpl",
-	}
 
-	ts, err := template.ParseFiles(files...)
-	if err != nil {
-		app.serverError(w, err)
-		return
-	}
 	data := &templateData{
 		Snippet: snippet,
 	}
-	err = ts.ExecuteTemplate(w, "base", data)
-	if err != nil {
-		app.serverError(w, err)
-		return
-	}
+	app.render(w, http.StatusOK, "view.tmpl", data)
 }
 
 func (app *application) snippetCreate(w http.ResponseWriter, r *http.Request) {
-	//fmt.Println("before method check")
 	if r.Method != http.MethodPost {
 		w.Header().Set("Allow", http.MethodPost)
 		app.clientError(w, http.StatusMethodNotAllowed)
 		return
 	}
-	//fmt.Println("handler called with post (after method check)")
 	title := "0 snail"
 	content := "0 snail\nClimb mount fuji,\nBut slowly slowly!\n\n- Kobayashi Issa"
 	expires := 7
-	//fmt.Println("before calling insert")
 	id, err := app.snippets.Insert(title, content, expires)
-	//fmt.Println("after calling insert")
 	if err != nil {
 		app.serverError(w, err)
 		return
 	}
-	//fmt.Sprintf("after error checking insert with id: %d", id)
 	http.Redirect(w, r, fmt.Sprintf("/snippet/view?id=%d", id), http.StatusSeeOther)
 }
