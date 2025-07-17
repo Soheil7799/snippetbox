@@ -1,3 +1,4 @@
 tmp
 cmd/web/tmp
 .idea
+.air.toml
