@@ -10,8 +10,8 @@ import (
 
 func home(w http.ResponseWriter, r *http.Request) {
 	files := []string{
-		"ui/html/pages/home.html",
-		"ui/html/base.html",
+		"ui/html/pages/home.gohtml",
+		"ui/html/base.gohtml",
 	}
 	template_set, err := template.ParseFiles(files...)
 	if err != nil {
