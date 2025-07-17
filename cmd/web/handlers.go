@@ -15,14 +15,17 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 	}
 	template_set, err := template.ParseFiles(files...)
 	if err != nil {
-		app.logger.Error(err.Error(), "method", r.Method, "url", r.URL.RequestURI())
-		http.Error(w, "internal server error", http.StatusInternalServerError)
+		//app.logger.Error(err.Error(), "method", r.Method, "url", r.URL.RequestURI())
+		//http.Error(w, "internal server error", http.StatusInternalServerError)
+		app.serverError(w, r, err)
 		return
 	}
 	err = template_set.ExecuteTemplate(w, "base", nil)
 	if err != nil {
-		app.logger.Error(err.Error(), "method", r.Method, "url", r.URL.RequestURI())
-		http.Error(w, "internal server error", http.StatusInternalServerError)
+		//app.logger.Error(err.Error(), "method", r.Method, "url", r.URL.RequestURI())
+		//http.Error(w, "internal server error", http.StatusInternalServerError)
+		app.serverError(w, r, err)
+		
 		return
 	}
 
