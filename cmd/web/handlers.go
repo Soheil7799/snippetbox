@@ -2,12 +2,26 @@ package main
 
 import (
 	"fmt"
+	"html/template"
+	"log"
 	"net/http"
 	"strconv"
 )
 
 func home(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("this is home page"))
+	template_set, err := template.ParseFiles("ui/html/pages/home.html")
+	if err != nil {
+		log.Print(err.Error())
+		http.Error(w, "internal server error", http.StatusInternalServerError)
+		return
+	}
+	err = template_set.Execute(w, nil)
+	if err != nil {
+		log.Print(err.Error())
+		http.Error(w, "internal server error", http.StatusInternalServerError)
+		return
+	}
+
 }
 
 func snippetView(w http.ResponseWriter, r *http.Request) {
