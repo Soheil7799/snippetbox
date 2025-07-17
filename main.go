@@ -17,7 +17,7 @@ func snippetView(w http.ResponseWriter, r *http.Request) {
 		http.NotFound(w, r)
 		return
 	}
-	w.Write([]byte(fmt.Sprintf("this is the view page for note id: %d", id)))
+	fmt.Fprintf(w, "this is the view page for note id: %d", id)
 }
 
 func snippetCreate(w http.ResponseWriter, r *http.Request) {
@@ -25,6 +25,7 @@ func snippetCreate(w http.ResponseWriter, r *http.Request) {
 }
 
 func snippetCreatePost(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusCreated)
 	w.Write([]byte("here we create a new snippet hopefully"))
 }
 
