@@ -3,9 +3,11 @@ package main
 import (
 	"errors"
 	"fmt"
-	"github.com/Soheil7799/snippetbox/internal/models"
+	"html/template"
 	"net/http"
 	"strconv"
+
+	"github.com/Soheil7799/snippetbox/internal/models"
 )
 
 func (app *application) home(w http.ResponseWriter, r *http.Request) {
@@ -42,6 +44,15 @@ func (app *application) snippetView(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	files := []string{
+		"./ui/html/base.gohtml",
+		"./ui/html/partials/nav.gohtml",
+		"./ui/html/pages/view.gohtml",
+	}
+	templateSet, err := template.ParseFiles(files...)
+	if err != nil {
+		app.serverError(w, r, err)
+	}
 	snippet, err := app.DB.Get(id)
 
 	if err != nil {
@@ -52,8 +63,14 @@ func (app *application) snippetView(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
+	templateData := templateData{
+		Snippet: snippet,
+	}
 
-	fmt.Fprintf(w, "%+v", snippet)
+	err = templateSet.ExecuteTemplate(w, "base", templateData)
+	if err != nil {
+		app.serverError(w, r, err)
+	}
 }
 
 func (app *application) snippetCreate(w http.ResponseWriter, r *http.Request) {
