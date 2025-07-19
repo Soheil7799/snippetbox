@@ -28,7 +28,6 @@ func (app *application) render(w http.ResponseWriter, r *http.Request, status in
 		return
 	}
 	buffer := new(bytes.Buffer)
-	w.WriteHeader(status)
 	err := templateSet.ExecuteTemplate(buffer, "base", data)
 	if err != nil {
 		app.serverError(w, r, err)
