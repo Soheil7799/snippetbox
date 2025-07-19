@@ -4,17 +4,20 @@ import (
 	"database/sql"
 	"flag"
 	"fmt"
-	"github.com/Soheil7799/snippetbox/internal/models"
+	"html/template"
 	"log/slog"
 	"net/http"
 	"os"
+
+	"github.com/Soheil7799/snippetbox/internal/models"
 
 	_ "github.com/go-sql-driver/mysql"
 )
 
 type application struct {
-	logger *slog.Logger
-	DB     *models.SnippetModel
+	logger        *slog.Logger
+	DB            *models.SnippetModel
+	templateCache map[string]*template.Template
 }
 
 func main() {
@@ -30,9 +33,15 @@ func main() {
 	}
 	defer db.Close()
 
+	templateChache, err := newTemplateCache()
+	if err != nil {
+		logger.Error(err.Error())
+		os.Exit(1)
+	}
 	app := &application{
-		logger: logger,
-		DB:     &models.SnippetModel{DB: db},
+		logger:        logger,
+		DB:            &models.SnippetModel{DB: db},
+		templateCache: templateChache,
 	}
 
 	logger.Info(fmt.Sprintf("Starting server on %s", *flagAddress), slog.Any("address", *flagAddress))
