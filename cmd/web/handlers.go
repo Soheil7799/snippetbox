@@ -11,29 +11,32 @@ import (
 )
 
 func (app *application) home(w http.ResponseWriter, r *http.Request) {
-	//files := []string{
-	//	"ui/html/pages/home.gohtml",
-	//	"ui/html/base.gohtml",
-	//	"ui/html/partials/nav.gohtml",
-	//}
-	//templateSet, err := template.ParseFiles(files...)
-	//if err != nil {
-	//	app.serverError(w, r, err)
-	//	return
-	//}
+	files := []string{
+		"ui/html/pages/home.gohtml",
+		"ui/html/base.gohtml",
+		"ui/html/partials/nav.gohtml",
+	}
+	templateSet, err := template.ParseFiles(files...)
+	if err != nil {
+		app.serverError(w, r, err)
+		return
+	}
 	snippets, err := app.DB.Latest()
 	if err != nil {
 		app.serverError(w, r, err)
 	}
-	for _, snippet := range snippets {
-		fmt.Fprint(w, "%+v\n", snippet)
+	// for _, snippet := range snippets {
+	// 	fmt.Fprint(w, "%+v\n", snippet)
 
+	// }
+	templateData := templateData{
+		Snippets: snippets,
 	}
-	//err = templateSet.ExecuteTemplate(w, "base", snippets)
-	//if err != nil {
-	//	app.serverError(w, r, err)
-	//	return
-	//}
+	err = templateSet.ExecuteTemplate(w, "base", templateData)
+	if err != nil {
+		app.serverError(w, r, err)
+		return
+	}
 
 }
 
