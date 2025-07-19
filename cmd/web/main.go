@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"flag"
 	"fmt"
-
+	"github.com/Soheil7799/snippetbox/internal/models"
 	"log/slog"
 	"net/http"
 	"os"
@@ -14,6 +14,7 @@ import (
 
 type application struct {
 	logger *slog.Logger
+	DB     *models.SnippetModel
 }
 
 func main() {
@@ -22,15 +23,17 @@ func main() {
 	flag.Parse()
 
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
-	app := &application{
-		logger: logger,
-	}
 
 	db, err := openDB(*dsn)
 	if err != nil {
-		app.logger.Error(err.Error())
+		logger.Error(err.Error())
 	}
 	defer db.Close()
+
+	app := &application{
+		logger: logger,
+		DB:     &models.SnippetModel{DB: db},
+	}
 
 	logger.Info(fmt.Sprintf("Starting server on %s", *flagAddress), slog.Any("address", *flagAddress))
 

@@ -15,17 +15,13 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 	}
 	template_set, err := template.ParseFiles(files...)
 	if err != nil {
-		//app.logger.Error(err.Error(), "method", r.Method, "url", r.URL.RequestURI())
-		//http.Error(w, "internal server error", http.StatusInternalServerError)
 		app.serverError(w, r, err)
 		return
 	}
 	err = template_set.ExecuteTemplate(w, "base", nil)
 	if err != nil {
-		//app.logger.Error(err.Error(), "method", r.Method, "url", r.URL.RequestURI())
-		//http.Error(w, "internal server error", http.StatusInternalServerError)
 		app.serverError(w, r, err)
-		
+
 		return
 	}
 
@@ -45,6 +41,17 @@ func (app *application) snippetCreate(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) snippetCreatePost(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusCreated)
-	w.Write([]byte("here we create a new snippet hopefully"))
+	title := "O snail"
+	content := "O snail\nClimb Mount Fuji,\nBut slowly, slowly!\n\n– Kobayashi Issa"
+	expires := 7
+
+	id, err := app.DB.Insert(title, content, expires)
+	if err != nil {
+		app.logger.Error("could not create the snippet")
+		app.serverError(w, r, err)
+		return
+	}
+
+	http.Redirect(w, r, fmt.Sprintf("/snippet/view/%d", id), http.StatusSeeOther)
+
 }
