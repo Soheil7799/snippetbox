@@ -47,6 +47,7 @@ func main() {
 	sessionManager := scs.New()
 	sessionManager.Store = mysqlstore.New(db)
 	sessionManager.Lifetime = 12 * time.Hour
+	sessionManager.Cookie.Secure = true
 	app := &application{
 		logger:         logger,
 		DB:             &models.SnippetModel{DB: db},
@@ -57,12 +58,17 @@ func main() {
 
 	logger.Info(fmt.Sprintf("Starting server on %s", *flagAddress), slog.Any("address", *flagAddress))
 
-	err = http.ListenAndServe(*flagAddress, app.routes())
+	srv := &http.Server{
+		Addr:     *flagAddress,
+		Handler:  app.routes(),
+		ErrorLog: slog.NewLogLogger(logger.Handler(), slog.LevelError),
+	}
+	err = srv.ListenAndServeTLS("./tls/cert.pem", "./tls/key.pem")
+	// err = srv.ListenAndServe()
 
 	logger.Error(err.Error())
 	os.Exit(1)
 }
-
 func openDB(dsn string) (*sql.DB, error) {
 	db, err := sql.Open("mysql", dsn)
 	if err != nil {
